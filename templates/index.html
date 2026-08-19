@@ -1,176 +1,145 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en" data-theme="dark">
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>HAND WARS</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAND WARS - Stone Paper Scissors</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-
-
 <body>
 
-<div class="container">
-
-    <div class="setup-card">
-
-        <div class="logo">
-            ✊
-        </div>
-
-        <h1>
-            HAND WARS
-        </h1>
-
-        <p class="subtitle">
-            The Ultimate Stone • Paper • Scissors Battle
-        </p>
-
-
-        <div class="line"></div>
-
-
-        <h2>
-            CHOOSE ROUNDS
-        </h2>
-
-        <p class="description">
-            Select the number of rounds
-            you want to play.
-        </p>
-
-
-        <form
-            action="/start"
-            method="POST"
-        >
-
-            <div class="round-grid">
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="rounds"
-                        value="1"
-                    >
-
-                    <span>
-                        <b>1</b>
-                        ROUND
-                    </span>
-
-                </label>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="rounds"
-                        value="3"
-                    >
-
-                    <span>
-                        <b>3</b>
-                        ROUNDS
-                    </span>
-
-                </label>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="rounds"
-                        value="5"
-                        checked
-                    >
-
-                    <span>
-                        <b>5</b>
-                        ROUNDS
-                    </span>
-
-                </label>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="rounds"
-                        value="7"
-                    >
-
-                    <span>
-                        <b>7</b>
-                        ROUNDS
-                    </span>
-
-                </label>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="rounds"
-                        value="10"
-                    >
-
-                    <span>
-                        <b>10</b>
-                        ROUNDS
-                    </span>
-
-                </label>
-
+    <!-- TOP NAVBAR -->
+    <header class="top-navbar">
+        <div class="brand-box">
+            <div class="brand-icon">✊</div>
+            <div>
+                <div class="brand-title">HAND WARS</div>
+                <div class="brand-subtitle">AI & Multiplayer Battle</div>
             </div>
-
-
-            <button
-                type="submit"
-                class="primary-button"
-            >
-                START GAME →
-            </button>
-
-        </form>
-
-
-        <div class="tech">
-
-            🤖 TensorFlow
-
-            <span>•</span>
-
-            ⚡ Flask
-
-            <span>•</span>
-
-            ✋ Teachable Machine
-
         </div>
+        <div class="nav-actions">
+            <button type="button" class="sound-toggle-btn" title="Toggle Sound">
+                <span class="sound-icon">🔊</span>
+            </button>
+            <button type="button" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+                <span class="theme-icon">☀️</span>
+                <span class="theme-text">Light Mode</span>
+            </button>
+        </div>
+    </header>
 
+    <!-- SETUP CONTAINER -->
+    <div class="container">
+        <div class="setup-card">
+            
+            <h2>GAME SETUP</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">
+                Choose your game mode and round settings to start playing!
+            </p>
+
+            <form action="/start" method="POST" id="start-form">
+                
+                <!-- GAME MODE SELECTOR -->
+                <div class="mode-selector">
+                    <span class="section-label">1. Choose Game Mode</span>
+                    <div class="mode-grid">
+                        <label class="mode-card">
+                            <input type="radio" name="mode" value="pve" checked onclick="toggleModeInputs('pve')">
+                            <div class="mode-card-inner">
+                                <span class="icon">🤖</span>
+                                <h3>Human vs Computer</h3>
+                                <p>Play against smart AI</p>
+                            </div>
+                        </label>
+
+                        <label class="mode-card">
+                            <input type="radio" name="mode" value="pvp" onclick="toggleModeInputs('pvp')">
+                            <div class="mode-card-inner">
+                                <span class="icon">👥</span>
+                                <h3>Human vs Human</h3>
+                                <p>2-Player Pass & Play</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- PLAYER NAMES & DIFFICULTY -->
+                <div class="mode-selector">
+                    <span class="section-label">2. Players & Settings</span>
+                    <div class="player-names-grid">
+                        <div class="input-group">
+                            <label for="p1_name">Player 1 Name</label>
+                            <input type="text" id="p1_name" name="p1_name" class="custom-input" placeholder="e.g. Player 1" value="Player 1">
+                        </div>
+                        <div class="input-group">
+                            <label for="p2_name" id="p2_label">Computer Name</label>
+                            <input type="text" id="p2_name" name="p2_name" class="custom-input" placeholder="Computer 🤖" value="Computer 🤖">
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="difficulty-group" style="margin-bottom: 24px;">
+                        <label for="difficulty">AI Difficulty</label>
+                        <select name="difficulty" id="difficulty" class="custom-input">
+                            <option value="easy">Easy 🟢 (Random)</option>
+                            <option value="medium" selected>Medium 🟡 (Balanced)</option>
+                            <option value="hard">Master 🔴 (Pattern Prediction)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ROUND SELECTOR -->
+                <div class="mode-selector">
+                    <span class="section-label">3. Select Total Rounds</span>
+                    <div class="round-grid">
+                        <label>
+                            <input type="radio" name="rounds" value="1">
+                            <div class="round-pill"><b>1</b>ROUND</div>
+                        </label>
+                        <label>
+                            <input type="radio" name="rounds" value="3">
+                            <div class="round-pill"><b>3</b>ROUNDS</div>
+                        </label>
+                        <label>
+                            <input type="radio" name="rounds" value="5" checked>
+                            <div class="round-pill"><b>5</b>ROUNDS</div>
+                        </label>
+                        <label>
+                            <input type="radio" name="rounds" value="7">
+                            <div class="round-pill"><b>7</b>ROUNDS</div>
+                        </label>
+                        <label>
+                            <input type="radio" name="rounds" value="10">
+                            <div class="round-pill"><b>10</b>ROUNDS</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- START BUTTON -->
+                <button type="submit" class="primary-button">
+                    <span>START BATTLE ⚔️</span>
+                </button>
+
+            </form>
+        </div>
     </div>
 
-</div>
+    <script>
+        function toggleModeInputs(mode) {
+            const p2Label = document.getElementById('p2_label');
+            const p2Input = document.getElementById('p2_name');
+            const diffGroup = document.getElementById('difficulty-group');
 
+            if (mode === 'pve') {
+                p2Label.textContent = 'Computer Name';
+                p2Input.value = 'Computer 🤖';
+                diffGroup.style.display = 'block';
+            } else {
+                p2Label.textContent = 'Player 2 Name';
+                p2Input.value = 'Player 2 👤';
+                diffGroup.style.display = 'none';
+            }
+        }
+    </script>
 </body>
-
 </html>

@@ -1,728 +1,351 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en" data-theme="dark">
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>HAND WARS - Game</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAND WARS - Gameplay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-
-
 <body>
 
-<div class="game-container">
-
-
-    <!-- HEADER -->
-
-    <header>
-
-        <div class="brand-small">
-
-            <span>✊</span>
-
+    <!-- TOP NAVBAR -->
+    <header class="top-navbar">
+        <div class="brand-box">
+            <div class="brand-icon">✊</div>
             <div>
-
-                <b>HAND WARS</b>
-
-                <small>
-                    HUMAN VS HUMAN
-                </small>
-
+                <div class="brand-title">HAND WARS</div>
+                <div class="brand-subtitle">
+                    {% if game_mode == 'pve' %}HUMAN VS COMPUTER{% else %}HUMAN VS HUMAN{% endif %}
+                </div>
             </div>
-
         </div>
-
-
-        <div class="round-badge">
-
-            ROUND
-
-            <strong>
-                {{ current_round }}
-            </strong>
-
-            /
-
-            {{ total_rounds }}
-
+        <div class="nav-actions">
+            <a href="/reset" class="nav-btn" onclick="return confirm('Restart game and go back to setup?');">
+                <span>🔄 Restart</span>
+            </a>
+            <button type="button" class="sound-toggle-btn" title="Toggle Sound">
+                <span class="sound-icon">🔊</span>
+            </button>
+            <button type="button" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+                <span class="theme-icon">☀️</span>
+                <span class="theme-text">Light Mode</span>
+            </button>
         </div>
-
     </header>
 
+    <!-- GAME CONTAINER -->
+    <div class="game-container">
 
-    <!-- SCORE -->
-
-    <div class="scoreboard">
-
-        <div class="score">
-
-            <span>
-                PLAYER 1
-            </span>
-
-            <b>
-                {{ score1 }}
-            </b>
-
-        </div>
-
-
-        <div class="vs">
-            VS
-        </div>
-
-
-        <div class="score">
-
-            <span>
-                PLAYER 2
-            </span>
-
-            <b>
-                {{ score2 }}
-            </b>
-
-        </div>
-
-    </div>
-
-
-    {% if error %}
-
-    <div class="error">
-        ⚠ {{ error }}
-    </div>
-
-    {% endif %}
-
-
-    <!-- PLAYERS -->
-
-    <div class="players">
-
-
-        <!-- PLAYER 1 -->
-
-        <div class="player-card">
-
-            <div class="player-title">
-
-                <div class="avatar">
-                    👤
+        <!-- SCOREBOARD -->
+        <div class="scoreboard-card">
+            <div class="player-score-box">
+                <div class="player-avatar">👤</div>
+                <div class="player-info">
+                    <h3>{{ p1_name }}</h3>
+                    <span style="font-size: 12px; color: var(--text-muted);">PLAYER 1</span>
                 </div>
+                <div class="score-num">{{ score1 }}</div>
+            </div>
 
-                <div>
+            <div class="vs-badge-container">
+                <div class="vs-badge">VS</div>
+                <div class="round-status">ROUND {{ current_round }} / {{ total_rounds }}</div>
+            </div>
 
-                    <h2>
-                        PLAYER 1
-                    </h2>
+            <div class="player-score-box">
+                <div class="score-num">{{ score2 }}</div>
+                <div class="player-info" style="text-align: right;">
+                    <h3>{{ p2_name }}</h3>
+                    <span style="font-size: 12px; color: var(--text-muted);">
+                        {% if game_mode == 'pve' %}COMPUTER 🤖{% else %}PLAYER 2 👤{% endif %}
+                    </span>
+                </div>
+                <div class="player-avatar">
+                    {% if game_mode == 'pve' %}🤖{% else %}👤{% endif %}
+                </div>
+            </div>
+        </div>
 
+        {% if error %}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-rose); color: var(--accent-rose); padding: 14px 20px; border-radius: 16px; font-weight: 600; text-align: center;">
+            ⚠ {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- ARENA GRID -->
+        <div class="arena-grid">
+
+            <!-- PLAYER 1 CARD -->
+            <div class="player-card">
+                <div class="player-card-header">
+                    <h3>👤 {{ p1_name }}</h3>
                     {% if player1_move %}
-
-                    <small>
-                        ✓ MOVE LOCKED
-                    </small>
-
+                    <span class="status-indicator ready">✓ MOVE LOCKED</span>
                     {% else %}
-
-                    <small>
-                        YOUR TURN
-                    </small>
-
+                    <span class="status-indicator waiting">YOUR TURN</span>
                     {% endif %}
-
                 </div>
 
-            </div>
-
-
-            {% if not player1_move %}
-
-            <!-- PLAYER 1 UPLOAD & WEBCAM -->
-
-            <div class="upload-area">
-
-                <div class="webcam-box" id="p1-webcam-box">
-                    <video id="webcam-p1" autoplay playsinline muted></video>
-                    <canvas id="canvas-p1" style="display:none;"></canvas>
+                {% if not player1_move %}
+                <!-- PLAYER 1 INPUT METHODS -->
+                <div class="input-tabs">
+                    <button type="button" class="input-tab-btn active" data-target="p1-webcam-tab">📷 Webcam AI</button>
+                    <button type="button" class="input-tab-btn" data-target="p1-manual-tab">✊ Manual Choice</button>
+                    <button type="button" class="input-tab-btn" data-target="p1-file-tab">📁 Upload File</button>
                 </div>
 
-                <div class="hand-icon" id="p1-icon" style="display:none;">
-                    ✋
-                </div>
-
-                <h3>
-                    SHOW YOUR HAND
-                </h3>
-
-                <p id="p1-status">
-                    Align your hand in camera & capture move
-                </p>
-
-
-                <form
-                    id="form-p1"
-                    action="/player1"
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
-
-                    <input
-                        type="file"
-                        id="file-p1"
-                        name="image"
-                        accept="image/*"
-                        capture="user"
-                        style="display:none;"
-                    >
-
-                    <button
-                        type="button"
-                        id="btn-capture-p1"
-                        class="primary-button"
-                        onclick="captureAndSubmit('p1', '/player1')"
-                    >
-                        📸 CAPTURE & DETECT MOVE
-                    </button>
-
-                    <div class="toggle-mode">
-                        <a href="#" onclick="toggleMode('p1'); return false;" id="toggle-p1">Switch to File Upload</a>
+                <!-- WEBCAM TAB -->
+                <div id="p1-webcam-tab" class="tab-content active">
+                    <div class="webcam-box">
+                        <video id="webcam-p1" autoplay playsinline muted></video>
+                        <div class="webcam-overlay"></div>
+                        <canvas id="canvas-p1" style="display:none;"></canvas>
                     </div>
-
-                </form>
-
-            </div>
-
-
-            {% elif not result %}
-
-            <!-- HIDDEN PLAYER 1 -->
-
-            <div class="hidden-move">
-
-                <div class="question">
-                    ?
+                    <span id="p1-status" style="font-size: 12px; color: var(--text-muted); text-align: center;">
+                        Position hand gesture in frame and click Capture
+                    </span>
+                    <form id="form-p1" action="/player1" method="POST" enctype="multipart/form-data" style="width: 100%;">
+                        <input type="file" id="file-p1" name="image" accept="image/*" style="display:none;">
+                        <button type="button" class="primary-button" onclick="captureAndSubmit('p1', '/player1')">
+                            📸 CAPTURE MOVE
+                        </button>
+                    </form>
                 </div>
 
-                <h3>
-                    MOVE LOCKED
-                </h3>
-
-                <p>
-                    Your move is hidden
-                    from Player 2.
-                </p>
-
-            </div>
-
-            {% else %}
-
-            <!-- PLAYER 1 RESULT -->
-
-            <div class="result-move-box">
-
-                <div class="big-hand">
-                    {% if player1_move == "Rock" %}✊{% elif player1_move == "Paper" %}✋{% else %}✌️{% endif %}
+                <!-- MANUAL CHOICE TAB -->
+                <div id="p1-manual-tab" class="tab-content">
+                    <span style="font-size: 13px; color: var(--text-muted);">Select your move directly:</span>
+                    <div class="manual-moves-grid">
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p1', 'Rock', '/player1')">
+                            <span class="emoji">✊</span>
+                            <span>Rock</span>
+                        </button>
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p1', 'Paper', '/player1')">
+                            <span class="emoji">✋</span>
+                            <span>Paper</span>
+                        </button>
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p1', 'Scissor', '/player1')">
+                            <span class="emoji">✌️</span>
+                            <span>Scissors</span>
+                        </button>
+                    </div>
                 </div>
 
-                <h3>
-                    {{ player1_move }}
-                </h3>
-
-                <span>
-                    PLAYER 1 MOVE
-                </span>
-
-            </div>
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- CENTER -->
-
-        <div class="center">
-
-            <div class="swords">
-                ⚔️
-            </div>
-
-
-            {% if not player1_move %}
-
-            <h2>
-                PLAYER 1
-            </h2>
-
-            <p>
-                Submit your hand
-                to continue.
-            </p>
-
-            {% elif not result %}
-
-            <h2>
-                PLAYER 2
-            </h2>
-
-            <p>
-                Player 1's move is hidden.
-                <br>
-                Now submit your move.
-            </p>
-
-            {% else %}
-
-            <h2>
-                ROUND RESULT
-            </h2>
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- PLAYER 2 -->
-
-        <div class="player-card">
-
-            <div class="player-title">
-
-                <div class="avatar">
-                    👤
+                <!-- FILE UPLOAD TAB -->
+                <div id="p1-file-tab" class="tab-content">
+                    <form action="/player1" method="POST" enctype="multipart/form-data" style="width:100%; display:flex; flex-direction:column; gap:12px;">
+                        <input type="file" name="image" accept="image/*" class="custom-input" required>
+                        <button type="submit" class="primary-button">📤 Upload & Detect Move</button>
+                    </form>
                 </div>
 
-                <div>
+                {% elif not result and game_mode == 'pvp' %}
+                <!-- P1 HIDDEN MOVE (WAITING FOR P2 IN PVP) -->
+                <div class="hidden-move-box">
+                    <div class="hidden-icon">🔒</div>
+                    <h3>Move Locked!</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">
+                        Your move is hidden. Hand camera to {{ p2_name }}.
+                    </p>
+                </div>
 
-                    <h2>
-                        PLAYER 2
-                    </h2>
+                {% else %}
+                <!-- PLAYER 1 RESULT MOVE -->
+                <div class="result-move-box">
+                    <div class="result-hand-emoji">
+                        {% if player1_move == "Rock" %}✊{% elif player1_move == "Paper" %}✋{% else %}✌️{% endif %}
+                    </div>
+                    <h3 style="font-size: 22px;">{{ player1_move }}</h3>
+                    <span style="font-size: 12px; color: var(--text-muted);">
+                        {% if confidence1 %}Confidence: {{ confidence1 }}%{% endif %}
+                    </span>
+                </div>
+                {% endif %}
 
+            </div>
+
+            <!-- CENTER ARENA (RESULT / VS ANNOUNCEMENT) -->
+            <div class="center-arena">
+                <div class="swords-icon">⚔️</div>
+
+                {% if result %}
+                <div class="round-result-card">
+                    <div class="winner-banner">
+                        {% if winner == 'PLAYER 1' %}
+                        🎉 {{ p1_name }} WINS ROUND!
+                        {% elif winner == 'PLAYER 2' %}
+                        🎉 {{ p2_name }} WINS ROUND!
+                        {% else %}
+                        🤝 ROUND IS A DRAW!
+                        {% endif %}
+                    </div>
+                    <a href="/next" class="btn-next" style="display: inline-block;">
+                        {% if current_round >= total_rounds %}
+                        SEE FINAL RESULTS 🏆
+                        {% else %}
+                        NEXT ROUND ➔
+                        {% endif %}
+                    </a>
+                </div>
+                {% else %}
+                <div style="text-align: center;">
+                    <h4 style="font-size: 16px; color: var(--text-accent);">
+                        {% if not player1_move %}
+                        WAITING FOR {{ p1_name }}
+                        {% elif game_mode == 'pvp' %}
+                        WAITING FOR {{ p2_name }}
+                        {% else %}
+                        COMPUTER THINKING...
+                        {% endif %}
+                    </h4>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PLAYER 2 / COMPUTER CARD -->
+            <div class="player-card">
+                <div class="player-card-header">
+                    <h3>{% if game_mode == 'pve' %}🤖{% else %}👤{% endif %} {{ p2_name }}</h3>
                     {% if result %}
-
-                    <small>
-                        ✓ MOVE LOCKED
-                    </small>
-
-                    {% elif player1_move %}
-
-                    <small>
-                        YOUR TURN
-                    </small>
-
+                    <span class="status-indicator ready">✓ MOVE LOCKED</span>
+                    {% elif player1_move and game_mode == 'pvp' %}
+                    <span class="status-indicator waiting">YOUR TURN</span>
                     {% else %}
-
-                    <small>
-                        WAITING
-                    </small>
-
+                    <span class="status-indicator">WAITING</span>
                     {% endif %}
-
                 </div>
 
-            </div>
-
-
-            {% if not player1_move %}
-
-            <div class="hidden-move">
-
-                <div class="question">
-                    ?
+                {% if game_mode == 'pve' and not result %}
+                <!-- COMPUTER WAITING / THINKING -->
+                <div class="hidden-move-box">
+                    <div class="hidden-icon">🤖</div>
+                    <h3>Computer AI Ready</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">
+                        Computer will make its move immediately when you lock yours!
+                    </p>
                 </div>
 
-                <h3>
-                    WAITING
-                </h3>
-
-                <p>
-                    Player 1 must
-                    play first.
-                </p>
-
-            </div>
-
-
-            {% elif not result %}
-
-            <!-- PLAYER 2 UPLOAD & WEBCAM -->
-
-            <div class="upload-area">
-
-                <div class="webcam-box" id="p2-webcam-box">
-                    <video id="webcam-p2" autoplay playsinline muted></video>
-                    <canvas id="canvas-p2" style="display:none;"></canvas>
+                {% elif game_mode == 'pvp' and not player1_move %}
+                <!-- PVP WAITING FOR PLAYER 1 FIRST -->
+                <div class="hidden-move-box">
+                    <div class="hidden-icon">⏳</div>
+                    <h3>Waiting for {{ p1_name }}</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">
+                        {{ p1_name }} must play their turn first.
+                    </p>
                 </div>
 
-                <div class="hand-icon" id="p2-icon" style="display:none;">
-                    ✋
+                {% elif game_mode == 'pvp' and not result %}
+                <!-- PLAYER 2 INPUT METHODS (PVP MODE) -->
+                <div class="input-tabs">
+                    <button type="button" class="input-tab-btn active" data-target="p2-webcam-tab">📷 Webcam AI</button>
+                    <button type="button" class="input-tab-btn" data-target="p2-manual-tab">✊ Manual Choice</button>
+                    <button type="button" class="input-tab-btn" data-target="p2-file-tab">📁 Upload File</button>
                 </div>
 
-                <h3>
-                    SHOW YOUR HAND
-                </h3>
-
-                <p id="p2-status">
-                    Align your hand in camera & capture move
-                </p>
-
-
-                <form
-                    id="form-p2"
-                    action="/player2"
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
-
-                    <input
-                        type="file"
-                        id="file-p2"
-                        name="image"
-                        accept="image/*"
-                        capture="user"
-                        style="display:none;"
-                    >
-
-                    <button
-                        type="button"
-                        id="btn-capture-p2"
-                        class="primary-button"
-                        onclick="captureAndSubmit('p2', '/player2')"
-                    >
-                        📸 CAPTURE & DETECT MOVE
-                    </button>
-
-                    <div class="toggle-mode">
-                        <a href="#" onclick="toggleMode('p2'); return false;" id="toggle-p2">Switch to File Upload</a>
+                <!-- WEBCAM TAB FOR P2 -->
+                <div id="p2-webcam-tab" class="tab-content active">
+                    <div class="webcam-box">
+                        <video id="webcam-p2" autoplay playsinline muted></video>
+                        <div class="webcam-overlay"></div>
+                        <canvas id="canvas-p2" style="display:none;"></canvas>
                     </div>
-
-                </form>
-
-            </div>
-
-
-            {% else %}
-
-            <!-- PLAYER 2 RESULT -->
-
-            <div class="result-move-box">
-
-                <div class="big-hand">
-                    {% if player2_move == "Rock" %}✊{% elif player2_move == "Paper" %}✋{% else %}✌️{% endif %}
+                    <span id="p2-status" style="font-size: 12px; color: var(--text-muted); text-align: center;">
+                        Position hand gesture in frame and click Capture
+                    </span>
+                    <form id="form-p2" action="/player2" method="POST" enctype="multipart/form-data" style="width: 100%;">
+                        <input type="file" id="file-p2" name="image" accept="image/*" style="display:none;">
+                        <button type="button" class="primary-button" onclick="captureAndSubmit('p2', '/player2')">
+                            📸 CAPTURE MOVE
+                        </button>
+                    </form>
                 </div>
 
-                <h3>
-                    {{ player2_move }}
-                </h3>
+                <!-- MANUAL CHOICE TAB FOR P2 -->
+                <div id="p2-manual-tab" class="tab-content">
+                    <span style="font-size: 13px; color: var(--text-muted);">Select move directly:</span>
+                    <div class="manual-moves-grid">
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p2', 'Rock', '/player2')">
+                            <span class="emoji">✊</span>
+                            <span>Rock</span>
+                        </button>
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p2', 'Paper', '/player2')">
+                            <span class="emoji">✋</span>
+                            <span>Paper</span>
+                        </button>
+                        <button type="button" class="move-choice-btn" onclick="submitManualMove('p2', 'Scissor', '/player2')">
+                            <span class="emoji">✌️</span>
+                            <span>Scissors</span>
+                        </button>
+                    </div>
+                </div>
 
-                <span>
-                    PLAYER 2 MOVE
-                </span>
+                <!-- FILE UPLOAD TAB FOR P2 -->
+                <div id="p2-file-tab" class="tab-content">
+                    <form action="/player2" method="POST" enctype="multipart/form-data" style="width:100%; display:flex; flex-direction:column; gap:12px;">
+                        <input type="file" name="image" accept="image/*" class="custom-input" required>
+                        <button type="submit" class="primary-button">📤 Upload & Detect Move</button>
+                    </form>
+                </div>
 
-            </div>
-
-            {% endif %}
-
-        </div>
-
-    </div>
-
-
-    <!-- RESULT -->
-
-    {% if result %}
-
-    <div class="result-panel">
-
-        <p>
-            ROUND {{ current_round }} RESULT
-        </p>
-
-
-        {% if winner == "PLAYER 1" %}
-
-        <h1>
-            🏆 PLAYER 1 WINS!
-        </h1>
-
-        {% elif winner == "PLAYER 2" %}
-
-        <h1>
-            🏆 PLAYER 2 WINS!
-        </h1>
-
-        {% else %}
-
-        <h1>
-            🤝 DRAW!
-        </h1>
-
-        {% endif %}
-
-
-        <div class="moves">
-
-            <div>
-
-                <span>
-                    PLAYER 1
-                </span>
-
-                <b>
-                    {{ player1_move }}
-                </b>
-
-            </div>
-
-
-            <strong>
-                VS
-            </strong>
-
-
-            <div>
-
-                <span>
-                    PLAYER 2
-                </span>
-
-                <b>
-                    {{ player2_move }}
-                </b>
+                {% else %}
+                <!-- PLAYER 2 / COMPUTER RESULT MOVE -->
+                <div class="result-move-box">
+                    <div class="result-hand-emoji">
+                        {% if player2_move == "Rock" %}✊{% elif player2_move == "Paper" %}✋{% else %}✌️{% endif %}
+                    </div>
+                    <h3 style="font-size: 22px;">{{ player2_move }}</h3>
+                    <span style="font-size: 12px; color: var(--text-muted);">
+                        {% if confidence2 %}Confidence: {{ confidence2 }}%{% endif %}
+                    </span>
+                </div>
+                {% endif %}
 
             </div>
 
         </div>
 
-
-        {% if current_round < total_rounds %}
-
-        <a
-            href="/next"
-            class="primary-button next-button"
-        >
-            NEXT ROUND →
-        </a>
-
-        {% else %}
-
-        <a
-            href="/final"
-            class="primary-button next-button"
-        >
-            VIEW FINAL RESULT →
-        </a>
-
-        {% endif %}
-
-    </div>
-
-    {% endif %}
-
-
-    <!-- HISTORY -->
-
-    <div class="history">
-
-        <h3>
-            ROUND HISTORY
-        </h3>
-
-
+        <!-- ROUND HISTORY TABLE -->
         {% if history %}
-
-        {% for item in history %}
-
-        <div class="history-item">
-
-            <span>
-                ROUND {{ item.round }}
-            </span>
-
-            <b>
-                {{ item.player1 }}
-            </b>
-
-            <strong>
-                VS
-            </strong>
-
-            <b>
-                {{ item.player2 }}
-            </b>
-
-            <em>
-                {{ item.winner }}
-            </em>
-
+        <div class="history-card">
+            <h3>📜 Battle History</h3>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Round</th>
+                        <th>{{ p1_name }}</th>
+                        <th>{{ p2_name }}</th>
+                        <th>Round Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td><b>Round {{ item.round }}</b></td>
+                        <td>
+                            {% if item.player1 == 'Rock' %}✊ Rock{% elif item.player1 == 'Paper' %}✋ Paper{% else %}✌️ Scissors{% endif %}
+                        </td>
+                        <td>
+                            {% if item.player2 == 'Rock' %}✊ Rock{% elif item.player2 == 'Paper' %}✋ Paper{% else %}✌️ Scissors{% endif %}
+                        </td>
+                        <td>
+                            {% if item.winner == 'PLAYER 1' %}
+                            <span style="color: var(--accent-emerald); font-weight:700;">🏆 {{ p1_name }}</span>
+                            {% elif item.winner == 'PLAYER 2' %}
+                            <span style="color: var(--accent-gold); font-weight:700;">🏆 {{ p2_name }}</span>
+                            {% else %}
+                            <span style="color: var(--text-muted); font-weight:600;">🤝 Draw</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-        {% endfor %}
-
-        {% else %}
-
-        <p>
-            No completed rounds yet.
-        </p>
-
         {% endif %}
 
     </div>
-
-
-</div>
-
-
-<script>
-let currentStream = null;
-let activePlayer = '{{ "p2" if player1_move and not result else "p1" }}';
-let isWebcamActive = true;
-
-async function initWebcam(player) {
-    const video = document.getElementById(`webcam-${player}`);
-    const box = document.getElementById(`${player}-webcam-box`);
-    const icon = document.getElementById(`${player}-icon`);
-    const status = document.getElementById(`${player}-status`);
-
-    if (!video) return;
-
-    try {
-        currentStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
-            audio: false
-        });
-        video.srcObject = currentStream;
-        if (box) box.style.display = 'block';
-        if (icon) icon.style.display = 'none';
-        isWebcamActive = true;
-    } catch (err) {
-        console.warn("Webcam access error:", err);
-        if (status) status.innerText = "Camera unavailable. Use file upload below.";
-        toggleMode(player, false);
-    }
-}
-
-function toggleMode(player, forceState) {
-    const fileInput = document.getElementById(`file-${player}`);
-    const btn = document.getElementById(`btn-capture-${player}`);
-    const box = document.getElementById(`${player}-webcam-box`);
-    const icon = document.getElementById(`${player}-icon`);
-    const toggleLink = document.getElementById(`toggle-${player}`);
-    const form = document.getElementById(`form-${player}`);
-
-    if (forceState !== undefined) {
-        isWebcamActive = forceState;
-    } else {
-        isWebcamActive = !isWebcamActive;
-    }
-
-    if (!isWebcamActive) {
-        if (box) box.style.display = 'none';
-        if (icon) icon.style.display = 'block';
-        if (fileInput) {
-            fileInput.style.display = 'block';
-            fileInput.required = true;
-        }
-        if (btn) {
-            btn.innerText = 'DETECT MOVE FROM FILE';
-            btn.onclick = null;
-            btn.type = 'submit';
-        }
-        if (toggleLink) toggleLink.innerText = 'Switch to Live WebCam';
-    } else {
-        if (box) box.style.display = 'block';
-        if (icon) icon.style.display = 'none';
-        if (fileInput) {
-            fileInput.style.display = 'none';
-            fileInput.required = false;
-        }
-        if (btn) {
-            btn.innerText = '📸 CAPTURE & DETECT MOVE';
-            btn.type = 'button';
-            btn.onclick = () => captureAndSubmit(player, form.action);
-        }
-        if (toggleLink) toggleLink.innerText = 'Switch to File Upload';
-        initWebcam(player);
-    }
-}
-
-function captureAndSubmit(player, actionUrl) {
-    const video = document.getElementById(`webcam-${player}`);
-    const canvas = document.getElementById(`canvas-${player}`);
-    const fileInput = document.getElementById(`file-${player}`);
-    const form = document.getElementById(`form-${player}`);
-    const btn = document.getElementById(`btn-capture-${player}`);
-
-    if (!isWebcamActive && fileInput && fileInput.files.length > 0) {
-        form.submit();
-        return;
-    }
-
-    if (!video || !canvas || !video.srcObject) {
-        alert("Camera stream is not active. Please select a file instead.");
-        toggleMode(player, false);
-        return;
-    }
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    btn.disabled = true;
-    btn.innerText = 'Analyzing Gesture...';
-
-    canvas.toBlob((blob) => {
-        const formData = new FormData();
-        formData.append('image', blob, 'webcam_capture.jpg');
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                return response.text().then(html => {
-                    document.open();
-                    document.write(html);
-                    document.close();
-                });
-            }
-        })
-        .catch(err => {
-            console.error("Submission failed:", err);
-            btn.disabled = false;
-            btn.innerText = '📸 CAPTURE & DETECT MOVE';
-        });
-    }, 'image/jpeg', 0.9);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    {% if not player1_move %}
-    initWebcam('p1');
-    {% elif not result %}
-    initWebcam('p2');
-    {% endif %}
-});
-</script>
 
 </body>
-
 </html>

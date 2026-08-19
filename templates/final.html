@@ -1,128 +1,111 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en" data-theme="dark">
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>HAND WARS - Match Result</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAND WARS - Victory & Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-
-
 <body>
 
-<div class="container">
-
-    <div class="final-card">
-
-        <div class="trophy">
-            🏆
-        </div>
-
-
-        <p class="match-complete">
-            MATCH COMPLETE
-        </p>
-
-
-        {% if winner == "PLAYER 1" %}
-
-        <h1>
-            PLAYER 1 WINS!
-        </h1>
-
-        <p class="final-message">
-            Congratulations Player 1!
-        </p>
-
-
-        {% elif winner == "PLAYER 2" %}
-
-        <h1>
-            PLAYER 2 WINS!
-        </h1>
-
-        <p class="final-message">
-            Congratulations Player 2!
-        </p>
-
-
-        {% else %}
-
-        <h1>
-            MATCH DRAW!
-        </h1>
-
-        <p class="final-message">
-            Both players played equally!
-        </p>
-
-        {% endif %}
-
-
-        <div class="final-score">
-
+    <!-- TOP NAVBAR -->
+    <header class="top-navbar">
+        <div class="brand-box">
+            <div class="brand-icon">🏆</div>
             <div>
+                <div class="brand-title">HAND WARS</div>
+                <div class="brand-subtitle">Final Match Results</div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button type="button" class="sound-toggle-btn" title="Toggle Sound">
+                <span class="sound-icon">🔊</span>
+            </button>
+            <button type="button" class="theme-toggle-btn" title="Toggle Light/Dark Theme">
+                <span class="theme-icon">☀️</span>
+                <span class="theme-text">Light Mode</span>
+            </button>
+        </div>
+    </header>
 
-                <span>
-                    PLAYER 1
-                </span>
+    <!-- CONTAINER -->
+    <div class="container">
+        <div class="final-card">
+            
+            <div class="trophy-badge">🏆</div>
+            
+            <h1 class="final-title">{{ winner_title }}</h1>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">
+                Match complete! Here is the breakdown of the battle performance.
+            </p>
 
-                <b>
-                    {{ score1 }}
-                </b>
+            <!-- STATS GRID -->
+            <div class="final-stats-grid">
+                <div class="stat-box">
+                    <span>{{ p1_name }} SCORE</span>
+                    <b style="color: var(--accent-cyan);">{{ score1 }}</b>
+                </div>
 
+                <div class="stat-box">
+                    <span>TOTAL ROUNDS</span>
+                    <b style="color: var(--accent-gold);">{{ total_rounds }}</b>
+                </div>
+
+                <div class="stat-box">
+                    <span>{{ p2_name }} SCORE</span>
+                    <b style="color: var(--accent-rose);">{{ score2 }}</b>
+                </div>
             </div>
 
+            <!-- HISTORY REPLAY TABLE -->
+            {% if history %}
+            <div style="margin-bottom: 32px; text-align: left;">
+                <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--text-accent);">Match Replay Summary</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>{{ p1_name }}</th>
+                            <th>{{ p2_name }}</th>
+                            <th>Winner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in history %}
+                        <tr>
+                            <td><b>Round {{ item.round }}</b></td>
+                            <td>
+                                {% if item.player1 == 'Rock' %}✊ Rock{% elif item.player1 == 'Paper' %}✋ Paper{% else %}✌️ Scissors{% endif %}
+                            </td>
+                            <td>
+                                {% if item.player2 == 'Rock' %}✊ Rock{% elif item.player2 == 'Paper' %}✋ Paper{% else %}✌️ Scissors{% endif %}
+                            </td>
+                            <td>
+                                {% if item.winner == 'PLAYER 1' %}
+                                <span style="color: var(--accent-emerald); font-weight:700;">{{ p1_name }}</span>
+                                {% elif item.winner == 'PLAYER 2' %}
+                                <span style="color: var(--accent-gold); font-weight:700;">{{ p2_name }}</span>
+                                {% else %}
+                                <span style="color: var(--text-muted);">Draw</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
 
-            <strong>
-                :
-            </strong>
-
-
-            <div>
-
-                <span>
-                    PLAYER 2
-                </span>
-
-                <b>
-                    {{ score2 }}
-                </b>
-
+            <!-- ACTION BUTTONS -->
+            <div style="display: flex; gap: 16px;">
+                <a href="/reset" class="primary-button" style="flex: 1; text-align: center;">
+                    ⚙️ PLAY AGAIN / SETUP
+                </a>
             </div>
 
         </div>
-
-
-        <p class="round-summary">
-            {{ total_rounds }} rounds played
-        </p>
-
-
-        <a
-            href="/"
-            class="primary-button"
-        >
-            PLAY AGAIN ↻
-        </a>
-
     </div>
 
-</div>
-
 </body>
-
 </html>
