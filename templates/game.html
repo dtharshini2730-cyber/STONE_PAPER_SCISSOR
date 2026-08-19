@@ -11,7 +11,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>RPS Arena - Game</title>
+    <title>HAND WARS - Game</title>
 
     <link
         rel="stylesheet"
@@ -36,7 +36,7 @@
 
             <div>
 
-                <b>RPS ARENA</b>
+                <b>HAND WARS</b>
 
                 <small>
                     HUMAN VS HUMAN
@@ -208,7 +208,7 @@
             </div>
 
 
-            {% else %}
+            {% elif not result %}
 
             <!-- HIDDEN PLAYER 1 -->
 
@@ -226,6 +226,26 @@
                     Your move is hidden
                     from Player 2.
                 </p>
+
+            </div>
+
+            {% else %}
+
+            <!-- PLAYER 1 RESULT -->
+
+            <div class="result-move-box">
+
+                <div class="big-hand">
+                    {% if player1_move == "Rock" %}✊{% elif player1_move == "Paper" %}✋{% else %}✌️{% endif %}
+                </div>
+
+                <h3>
+                    {{ player1_move }}
+                </h3>
+
+                <span>
+                    PLAYER 1 MOVE
+                </span>
 
             </div>
 
@@ -403,7 +423,7 @@
             <div class="result-move-box">
 
                 <div class="big-hand">
-                    ✋
+                    {% if player2_move == "Rock" %}✊{% elif player2_move == "Paper" %}✋{% else %}✌️{% endif %}
                 </div>
 
                 <h3>

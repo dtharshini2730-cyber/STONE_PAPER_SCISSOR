@@ -1,4 +1,4 @@
-# ✊ RPS Arena - AI Powered Rock Paper Scissors
+# ✊ HAND WARS - The Ultimate Stone • Paper • Scissors Battle
 
 An interactive **2-Player Local Rock-Paper-Scissors Web Application** powered by **Flask** and a **TensorFlow / Keras Deep Learning Model**. Players can use their computer's **Live WebCam** or upload hand gesture images to play against each other.
 

@@ -652,6 +652,77 @@ header {
 
 
 /* =====================================================
+   RESULT MOVE BOX
+   ===================================================== */
+
+.result-move-box {
+
+    min-height: 300px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #1b2844,
+            #0d1424
+        );
+
+    border: 1px solid #2b3a58;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+
+.big-hand {
+
+    font-size: 75px;
+
+    margin-bottom: 10px;
+
+    filter: drop-shadow(0 0 15px rgba(98, 124, 255, 0.4));
+}
+
+
+.result-move-box h3 {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    color: #ffffff;
+
+    margin-top: 5px;
+
+    letter-spacing: 1px;
+}
+
+
+.result-move-box span {
+
+    margin-top: 8px;
+
+    color: #718099;
+
+    font-size: 11px;
+
+    letter-spacing: 2px;
+}
+
+
+/* =====================================================
    CENTER
    ===================================================== */
 
