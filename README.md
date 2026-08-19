@@ -81,6 +81,6 @@ STONE_PAPER_SCISSOR/
 
 ---
 
-## 🛡️ License
+Author 
 
-This project is open-source and available under the [MIT License](LICENSE).
+R DEVATHARSHINI
